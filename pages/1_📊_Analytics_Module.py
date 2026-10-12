@@ -39,13 +39,15 @@ if not df.empty:
         (df['property_type'].isin(selected_types)) &
         (df['price'] >= price_range[0]) &
         (df['price'] <= price_range[1])
-    ]
+    ].copy() # Using copy to prevent SettingWithCopyWarning in tab3
 
     tab1, tab2, tab3, tab4 = st.tabs(["🗺️ Spatial Map", "📈 Price Distribution", "📐 Attributes vs Price", "🏪 Amenities & Facilities"])
 
     with tab1:
         st.subheader("Geographical Distribution of D.C. Properties")
-        fig_map = px.scatter_mapbox(
+        
+        # CHANGED: px.scatter_mapbox -> px.scatter_map
+        fig_map = px.scatter_map(
             filtered_df,
             lat="latitude",
             lon="longitude",
@@ -56,8 +58,9 @@ if not df.empty:
             color_continuous_scale="Viridis",
             zoom=11,
             height=600,
-            mapbox_style="open-street-map"
         )
+        # CHANGED: mapbox_style -> map_style configured via layout updates
+        fig_map.update_layout(map_style="open-street-map")
         st.plotly_chart(fig_map, use_container_width=True)
 
     with tab2:
@@ -122,3 +125,5 @@ if not df.empty:
                 title="Distance to Nearest Metro Station (Meters)"
             )
             st.plotly_chart(fig_metro, use_container_width=True)
+else:
+    st.error("No data found! Please ensure 'cleaned.csv' exists in the base directory or 'data/' folder.")
